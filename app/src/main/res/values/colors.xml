@@ -3,4 +3,9 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="colorBlueTurquoise">#22e9ff</color>
+    <color name="colorTurquoise">#01CEBB</color>
+    <color name="colorDarkGrey">#222</color>
+    <color name="colorSemiDarkGrey">#333</color>
+    <color name="colorLightGrey">#999</color>
 </resources>
