@@ -15,15 +15,8 @@
         android:orientation="vertical">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_weight="30"
-            android:gravity="bottom"
             android:text="Waluta obca"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/colorBlueTurquoise"/>
+            style="@style/label.curr"/>
 
         <Spinner
             android:id="@+id/spin_foreign"
@@ -36,25 +29,13 @@
             android:gravity="top"/>
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_weight="15"
-            android:gravity="bottom"
             android:text="Wpisz kwotę w walucie obcej:"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textColor="@color/colorLightGrey"/>
+            style="@style/label.descr"/>
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_weight="20"
-        android:background="@color/colorDarkGrey">
+        style="@style/layout_back">
 
         <EditText
             android:id="@+id/edit_foreign"
@@ -86,15 +67,8 @@
         android:orientation="vertical">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_weight="30"
-            android:gravity="bottom"
             android:text="Waluta macierzysta"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/colorBlueTurquoise"/>
+            style="@style/label.curr"/>
 
         <Spinner
             android:id="@+id/spin_home"
@@ -107,24 +81,12 @@
             android:gravity="top"/>
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_weight="15"
-            android:gravity="bottom"
             android:text="Kwota w walucie macierzystej:"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textColor="@color/colorLightGrey"/>
+            style="@style/label.descr"/>
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_weight="20"
-        android:background="@color/colorDarkGrey">
+        style="@style/layout_back">
 
         <TextView
             android:id="@+id/txt_home"

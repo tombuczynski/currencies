@@ -11,4 +11,33 @@
         <item name="android:editTextColor">@android:color/white</item>
     </style>
 
+    <style name="label">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:gravity">bottom</item>
+    </style>
+
+    <style name="label.curr">
+        <item name="android:layout_weight">30</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Medium</item>
+        <item name="android:textColor">@color/colorBlueTurquoise</item>
+    </style>
+
+    <style name="label.descr">
+        <item name="android:layout_weight">15</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Small</item>
+        <item name="android:textColor">@color/colorLightGrey</item>
+    </style>
+
+    <style name="layout_back">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_weight">20</item>
+        <item name="android:background">@color/colorDarkGrey</item>
+    </style>
+
 </resources>
