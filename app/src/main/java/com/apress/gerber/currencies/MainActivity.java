@@ -9,6 +9,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -17,7 +20,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
     public static final String SUPPORTED_CURRENCIES_URL = "https://oxr.readme.io/docs/supported-currencies";
     private String[] mCurrencies = null;
@@ -50,6 +53,14 @@ public class MainActivity extends AppCompatActivity {
         mEditForeign = findViewById(R.id.edit_foreign);
         mTxtHome = findViewById(R.id.txt_home);
 
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, mCurrencies);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        mSpinForeign.setAdapter(spinnerAdapter);
+        mSpinForeign.setOnItemSelectedListener(this);
+
+        mSpinHome.setAdapter(spinnerAdapter);
+        mSpinHome.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -66,6 +77,10 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.menu_swap_currencies:
+                int pos1 = mSpinForeign.getSelectedItemPosition();
+                int pos2 = mSpinHome.getSelectedItemPosition();
+                mSpinForeign.setSelection(pos2);
+                mSpinHome.setSelection(pos1);
                 break;
 
             case R.id.menu_view_currencies:
@@ -95,5 +110,15 @@ public class MainActivity extends AppCompatActivity {
         NetworkInfo info = manager.getActiveNetworkInfo();
 
         return info.isConnected();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }
