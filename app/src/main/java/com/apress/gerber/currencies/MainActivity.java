@@ -20,9 +20,13 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static android.widget.AdapterView.INVALID_POSITION;
+
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
     public static final String SUPPORTED_CURRENCIES_URL = "https://oxr.readme.io/docs/supported-currencies";
+    public static final String SPINNER_KEY_FOREIGN = "spinner_foreign";
+    private static final String SPINNER_KEY_HOME = "spinner_home";
     private String[] mCurrencies = null;
 
     private Spinner mSpinForeign, mSpinHome;
@@ -58,9 +62,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mSpinForeign.setAdapter(spinnerAdapter);
         mSpinForeign.setOnItemSelectedListener(this);
+        restoreCurrCodeSpinnerSelection(mSpinForeign, SPINNER_KEY_FOREIGN, "EUR");
 
         mSpinHome.setAdapter(spinnerAdapter);
         mSpinHome.setOnItemSelectedListener(this);
+        restoreCurrCodeSpinnerSelection(mSpinHome, SPINNER_KEY_HOME, "PLN");
     }
 
     @Override
@@ -94,14 +100,38 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         return true;
     }
 
-    private void openWebBrowser(String url) {
-        if (isNetworkConnected()) {
-            Uri uri = Uri.parse(url);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "Brak połączenia z Internetem", Toast.LENGTH_SHORT).show();
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        int viewId = parent.getId();
+
+        if (viewId == R.id.spin_foreign) {
+            saveCurrCodeSpinnerSelection(mSpinForeign, SPINNER_KEY_FOREIGN);
+            return;
         }
+
+        if (viewId == R.id.spin_home) {
+            saveCurrCodeSpinnerSelection(mSpinHome, SPINNER_KEY_HOME);
+            return;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    private void saveCurrCodeSpinnerSelection(Spinner spinner, String spinnerKey) {
+        int pos = spinner.getSelectedItemPosition();
+        if (pos != INVALID_POSITION) {
+            String currCode = extractCurrCode(mCurrencies[pos]);
+            ActivityPrefs.putStringPref(this, spinnerKey, currCode);
+        }
+    }
+
+    private void restoreCurrCodeSpinnerSelection(Spinner spinner, String spinnerKey, String defCode) {
+        String code = ActivityPrefs.getStringPref(this, spinnerKey, defCode);
+
+        spinner.setSelection(findPositionByCurrCode(code, mCurrencies));
     }
 
     private boolean isNetworkConnected() {
@@ -112,13 +142,26 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         return info.isConnected();
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+    private void openWebBrowser(String url) {
+        if (isNetworkConnected()) {
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Brak połączenia z Internetem", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
+    private static int findPositionByCurrCode(String code, String[] currList) {
+        for (int i = 0; i < currList.length; i++) {
+            if (extractCurrCode(currList[i]).equalsIgnoreCase(code))
+                return i;
+        }
 
+        return 0;
+    }
+
+    private static String extractCurrCode(String s) {
+        return s.trim().substring(0, 3);
     }
 }
