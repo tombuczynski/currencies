@@ -24,10 +24,14 @@ import static android.widget.AdapterView.INVALID_POSITION;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
-    public static final String SUPPORTED_CURRENCIES_URL = "https://oxr.readme.io/docs/supported-currencies";
-    public static final String SPINNER_KEY_FOREIGN = "spinner_foreign";
+    private static final String SUPPORTED_CURRENCIES_URL = "https://oxr.readme.io/docs/supported-currencies";
+    private static final String SPINNER_KEY_FOREIGN = "spinner_foreign";
     private static final String SPINNER_KEY_HOME = "spinner_home";
+    private static final String API_KEYS_PROPS = "api_keys.properties";
+    private static final String OER_API_KEY = "oer_key";
+
     private String[] mCurrencies = null;
+    private String mOERKey;
 
     private Spinner mSpinForeign, mSpinHome;
     private EditText mEditForeign;
@@ -42,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         Intent intent = getIntent();
         if (intent != null) {
+            @SuppressWarnings("unchecked")
             ArrayList<String> s = (ArrayList<String>) intent.getSerializableExtra(CURR_LIST_NAME);
             if (s != null) {
                 mCurrencies = s.toArray(new String[0]);
@@ -62,11 +67,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         mSpinForeign.setAdapter(spinnerAdapter);
         mSpinForeign.setOnItemSelectedListener(this);
-        restoreCurrCodeSpinnerSelection(mSpinForeign, SPINNER_KEY_FOREIGN, "EUR");
 
         mSpinHome.setAdapter(spinnerAdapter);
         mSpinHome.setOnItemSelectedListener(this);
-        restoreCurrCodeSpinnerSelection(mSpinHome, SPINNER_KEY_HOME, "PLN");
+
+        if (savedInstanceState == null) {
+            restoreCurrCodeSpinnerSelection(mSpinForeign, SPINNER_KEY_FOREIGN, "EUR");
+            restoreCurrCodeSpinnerSelection(mSpinHome, SPINNER_KEY_HOME, "PLN");
+        }
+
+        mOERKey = AssetsProperties.getStringProp(this, API_KEYS_PROPS, OER_API_KEY);
     }
 
     @Override
@@ -104,6 +114,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         int viewId = parent.getId();
 
+        mTxtHome.setText(" ");
+
         if (viewId == R.id.spin_foreign) {
             saveCurrCodeSpinnerSelection(mSpinForeign, SPINNER_KEY_FOREIGN);
             return;
@@ -117,6 +129,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    public void onCalcButtonClick(View v) {
 
     }
 
