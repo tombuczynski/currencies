@@ -3,7 +3,6 @@ package com.apress.gerber.currencies;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -15,7 +14,8 @@ import java.util.Iterator;
 
 public class SplashActivity extends Activity implements JSONObjectDownloader.ResultCallback {
     private static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
-    private final String CODES_LIST_URL = "https://openexchangerates.org/api/currencies.json";
+    private static final String OER_API_URL = "https://openexchangerates.org/api/";
+    private static final String OER_CODES = "currencies.json";
     private ArrayList<String> mCurrenciesList;
 
     @Override
@@ -25,14 +25,19 @@ public class SplashActivity extends Activity implements JSONObjectDownloader.Res
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_splash);
 
-        JSONObjectDownloader downloader = new JSONObjectDownloader(this);
-        downloader.execute(CODES_LIST_URL);
+        JSONObjectDownloader downloader = new JSONObjectDownloader(this, null, null);
+        downloader.execute(OER_API_URL + OER_CODES);
+    }
+
+    @Override
+    public void onBackPressed() {
+
     }
 
     @Override
     public void ResultReturned(JSONObject jsonObject) {
         try {
-            mCurrenciesList = JSONtoStringList(jsonObject);
+            mCurrenciesList = jSONtoStringList(jsonObject);
 
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(CURR_LIST_NAME, mCurrenciesList);
@@ -49,7 +54,7 @@ public class SplashActivity extends Activity implements JSONObjectDownloader.Res
         finish();
     }
 
-    private static ArrayList<String> JSONtoStringList(JSONObject jo) throws JSONException {
+    private static ArrayList<String> jSONtoStringList(JSONObject jo) throws JSONException {
         ArrayList<String> list = new ArrayList<>();
         Iterator<String> i = jo.keys();
         String key;

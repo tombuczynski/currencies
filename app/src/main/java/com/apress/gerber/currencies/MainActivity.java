@@ -1,12 +1,17 @@
 package com.apress.gerber.currencies;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,18 +22,26 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static android.widget.AdapterView.INVALID_POSITION;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, JSONObjectDownloader.ResultCallback {
     private static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
     private static final String SUPPORTED_CURRENCIES_URL = "https://oxr.readme.io/docs/supported-currencies";
     private static final String SPINNER_KEY_FOREIGN = "spinner_foreign";
     private static final String SPINNER_KEY_HOME = "spinner_home";
     private static final String API_KEYS_PROPS = "api_keys.properties";
     private static final String OER_API_KEY = "oer_key";
+    private static final String OER_API_URL = "https://openexchangerates.org/api/";
+    private static final String OER_RATES = "latest.json";
+    private static final String OER_APP_ID = "?app_id=";
+    private static final String OER_RATES_OBJECT = "rates";
+    private static final DecimalFormat RESULT_FORMAT = new DecimalFormat("#,##0.00");
 
     private String[] mCurrencies = null;
     private String mOERKey;
@@ -77,6 +90,23 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
 
         mOERKey = AssetsProperties.getStringProp(this, API_KEYS_PROPS, OER_API_KEY);
+
+        mEditForeign.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     @Override
@@ -115,6 +145,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         int viewId = parent.getId();
 
         mTxtHome.setText(" ");
+        mTxtHome.setText(RESULT_FORMAT.format(1234567.89));
+
 
         if (viewId == R.id.spin_foreign) {
             saveCurrCodeSpinnerSelection(mSpinForeign, SPINNER_KEY_FOREIGN);
@@ -133,6 +165,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void onCalcButtonClick(View v) {
+        AlertDialog.Builder dialBuilder = new AlertDialog.Builder(this);
+
+        dialBuilder.setTitle("Przeliczanie");
+
+        LayoutInflater li = getLayoutInflater();
+        View dlgView = li.inflate(R.layout.task_cancel_dlg_view, null);
+        dialBuilder.setView(dlgView);
+
+        JSONObjectDownloader downloader = new JSONObjectDownloader(this, dialBuilder, "Anuluj");
+        downloader.execute(OER_API_URL + OER_RATES + OER_APP_ID + mOERKey);
 
     }
 
@@ -179,5 +221,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private static String extractCurrCode(String s) {
         return s.trim().substring(0, 3);
+    }
+
+    @Override
+    public void ResultReturned(JSONObject jsonObject) {
+
+    }
+
+    @Override
+    public void Error(int errCode, String errMsg) {
+        if (errCode == JSONObjectDownloader.ResultCallback.ERR_CANCELED)
+            errMsg = "Przeliczanie przerwane";
+        Toast.makeText(this, "Error:" + errCode + ", " + errMsg, Toast.LENGTH_LONG).show();
     }
 }

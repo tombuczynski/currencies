@@ -1,5 +1,6 @@
 package com.apress.gerber.currencies;
 
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 
 import org.json.JSONException;
@@ -13,22 +14,30 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import androidx.appcompat.app.AlertDialog;
+
 /**
  * Created by Tom Buczynski on 25.05.2019.
  */
 public  class JSONObjectDownloader extends AsyncTask<String, Integer, JSONObject> {
 
+    private final AlertDialog.Builder mWaitDialogBuilder;
+    private AlertDialog mWaitDialog = null;
+    private final String mCancelButtonText;
     private String mErrorMsg;
     private int mErrorCode;
     private ResultCallback mResultCallback;
 
-    public JSONObjectDownloader(ResultCallback resultCallback) {
+    public JSONObjectDownloader(ResultCallback resultCallback, AlertDialog.Builder waitDialogBuilder, String cancelButtonText) {
         if (resultCallback == null) {
             throw new NullPointerException();
         }
 
         mResultCallback = resultCallback;
+        mWaitDialogBuilder = waitDialogBuilder;
+        mCancelButtonText = cancelButtonText;
     }
+
 
     public static interface ResultCallback {
 
@@ -36,6 +45,7 @@ public  class JSONObjectDownloader extends AsyncTask<String, Integer, JSONObject
         int ERR_HTTPS_URL_REQUIRED = 1;
         int ERR_IO = 2;
         int ERR_JSON = 3;
+        int ERR_CANCELED = 4;
 
         void ResultReturned(JSONObject jsonObject);
         void Error(int errCode, String errMsg);
@@ -46,10 +56,33 @@ public  class JSONObjectDownloader extends AsyncTask<String, Integer, JSONObject
     protected void onPreExecute() {
         mErrorMsg = "";
         mErrorCode = ResultCallback.ERR_OK;
+
+        if (mWaitDialogBuilder != null) {
+            mWaitDialogBuilder.setCancelable(false);
+
+            if (mCancelButtonText != null && mCancelButtonText.trim().length() > 0) {
+                mWaitDialogBuilder.setNegativeButton(mCancelButtonText, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        JSONObjectDownloader.this.cancel(true);
+                    }
+                });
+            }
+
+            mWaitDialog = mWaitDialogBuilder.create();
+            if (!isCancelled()) {
+                mWaitDialog.show();
+            }
+        }
+
     }
 
     @Override
     protected void onPostExecute(JSONObject jo) {
+        if (mWaitDialog != null) {
+            mWaitDialog.dismiss();
+        }
+
         if (jo != null) {
             mResultCallback.ResultReturned(jo);
         } else {
@@ -58,8 +91,22 @@ public  class JSONObjectDownloader extends AsyncTask<String, Integer, JSONObject
     }
 
     @Override
+    protected void onCancelled() {
+        setErrorMsg("Canceled");
+        setErrorCode(ResultCallback.ERR_CANCELED);
+        mResultCallback.Error(getErrorCode(), getErrorMsg());
+    }
+
+    @Override
     protected JSONObject doInBackground(String... strings) {
         if (! isCancelled() && strings != null && strings.length >=1) {
+
+//            try {
+//                Thread.sleep(8000);
+//            } catch (InterruptedException e) {
+//                return null;
+//            }
+
             InputStream stream = null;
             try {
                 URL url = new URL(strings[0]);
@@ -67,7 +114,8 @@ public  class JSONObjectDownloader extends AsyncTask<String, Integer, JSONObject
                 urlConnection.setDoInput(true);
                 urlConnection.setRequestMethod("GET");
                 urlConnection.setConnectTimeout(5000);
-                urlConnection.setReadTimeout(5000);
+                urlConnection.setReadTimeout(2000);
+                urlConnection.setUseCaches(false);
                 urlConnection.connect();
 
                 int responseCode = urlConnection.getResponseCode();
@@ -90,7 +138,6 @@ public  class JSONObjectDownloader extends AsyncTask<String, Integer, JSONObject
                 setErrorMsg(e.getLocalizedMessage());
                 setErrorCode(ResultCallback.ERR_JSON);
             }
-
         }
 
         return null;

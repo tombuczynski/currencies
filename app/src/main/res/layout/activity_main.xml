@@ -44,10 +44,11 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
+            android:digits="0123456789,."
             android:ems="10"
             android:inputType="numberDecimal"
             android:textSize="30sp"
-            tools:text="10.25"/>
+            tools:text="10.25" />
     </LinearLayout>
 
     <Button
@@ -99,6 +100,6 @@
             android:background="@color/colorSemiDarkGrey"
             android:textSize="30sp"
             android:textStyle="normal"
-            tools:text="125.10"/>
+            tools:text="125.10" />
     </LinearLayout>
 </LinearLayout>
