@@ -14,8 +14,8 @@ import java.util.Iterator;
 
 public class SplashActivity extends Activity implements JSONObjectDownloader.ResultCallback {
     private static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
-    private static final String OER_API_URL = "https://openexchangerates.org/api/";
-    private static final String OER_CODES = "currencies.json";
+    private static final String OXR_API_URL = "https://openexchangerates.org/api/";
+    private static final String OXR_CODES = "currencies.json";
     private ArrayList<String> mCurrenciesList;
 
     @Override
@@ -26,7 +26,7 @@ public class SplashActivity extends Activity implements JSONObjectDownloader.Res
         setContentView(R.layout.activity_splash);
 
         JSONObjectDownloader downloader = new JSONObjectDownloader(this, null, null);
-        downloader.execute(OER_API_URL + OER_CODES);
+        downloader.execute(OXR_API_URL + OXR_CODES);
     }
 
     @Override

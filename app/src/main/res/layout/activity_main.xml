@@ -60,7 +60,7 @@
         android:layout_weight="10"
         android:onClick="onCalcButtonClick"
         android:text="PRZELICZ"
-        android:textColor="@color/colorTurquoise" />
+        android:background="@drawable/button_pressed" />
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -1,9 +1,9 @@
 package com.apress.gerber.currencies;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -22,11 +22,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 import static android.widget.AdapterView.INVALID_POSITION;
 
@@ -36,24 +38,38 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private static final String SPINNER_KEY_FOREIGN = "spinner_foreign";
     private static final String SPINNER_KEY_HOME = "spinner_home";
     private static final String API_KEYS_PROPS = "api_keys.properties";
-    private static final String OER_API_KEY = "oer_key";
-    private static final String OER_API_URL = "https://openexchangerates.org/api/";
-    private static final String OER_RATES = "latest.json";
-    private static final String OER_APP_ID = "?app_id=";
-    private static final String OER_RATES_OBJECT = "rates";
+    private static final String OXR_API_KEY = "oxr_key";
+    private static final String OXR_API_URL = "https://openexchangerates.org/api/";
+    private static final String OXR_RATES = "latest.json";
+    private static final String OXR_APP_ID = "?app_id=";
+    private static final String OXR_RATES_OBJECT = "rates";
+    private static final String OXR_RATES_TIMESTAMP = "timestamp";
     private static final DecimalFormat RESULT_FORMAT = new DecimalFormat("#,##0.00");
+    private static final int RATES_TIMEOUT = 3600;
 
-    private String[] mCurrencies = null;
-    private String mOERKey;
+    private String mOXRKey;
+
+    private String[] mCurrencies;
+    private double mForeignVal;
 
     private Spinner mSpinForeign, mSpinHome;
     private EditText mEditForeign;
     private TextView mTxtHome;
 
+    private JSONObject mRates;
+    private int mRatesTimestamp = 0; // seconds
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setIcon(R.mipmap.ic_launcher_round);
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(true);
+        }
 
         mCurrencies = null;
 
@@ -89,12 +105,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             restoreCurrCodeSpinnerSelection(mSpinHome, SPINNER_KEY_HOME, "PLN");
         }
 
-        mOERKey = AssetsProperties.getStringProp(this, API_KEYS_PROPS, OER_API_KEY);
+        mOXRKey = AssetsProperties.getStringProp(this, API_KEYS_PROPS, OXR_API_KEY);
 
         mEditForeign.addTextChangedListener(new TextWatcher() {
+            private String mLastText = "";
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                mLastText = s.toString();
             }
 
             @Override
@@ -105,6 +123,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void afterTextChanged(Editable s) {
 
+                try {
+                    String newText = s.toString().trim();
+                    if (newText.length() > 0) {
+                        mForeignVal = Double.parseDouble(newText.replace(',', '.'));
+                    } else {
+                        mForeignVal = 0.0;
+                    }
+                } catch (NumberFormatException e) {
+                    mForeignVal = 0.0;
+                    s.replace(0, s.length(), mLastText);
+                }
             }
         });
     }
@@ -145,8 +174,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         int viewId = parent.getId();
 
         mTxtHome.setText(" ");
-        mTxtHome.setText(RESULT_FORMAT.format(1234567.89));
-
 
         if (viewId == R.id.spin_foreign) {
             saveCurrCodeSpinnerSelection(mSpinForeign, SPINNER_KEY_FOREIGN);
@@ -165,16 +192,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void onCalcButtonClick(View v) {
-        AlertDialog.Builder dialBuilder = new AlertDialog.Builder(this);
+        long currentTime = System.currentTimeMillis();
+        if ((System.currentTimeMillis() / 1000L - mRatesTimestamp) > RATES_TIMEOUT) {
+            AlertDialog.Builder dialBuilder = new AlertDialog.Builder(this);
 
-        dialBuilder.setTitle("Przeliczanie");
+            dialBuilder.setTitle("Przeliczanie");
 
-        LayoutInflater li = getLayoutInflater();
-        View dlgView = li.inflate(R.layout.task_cancel_dlg_view, null);
-        dialBuilder.setView(dlgView);
+            LayoutInflater li = getLayoutInflater();
+            View dlgView = li.inflate(R.layout.task_cancel_dlg_view, null);
+            dialBuilder.setView(dlgView);
 
-        JSONObjectDownloader downloader = new JSONObjectDownloader(this, dialBuilder, "Anuluj");
-        downloader.execute(OER_API_URL + OER_RATES + OER_APP_ID + mOERKey);
+            JSONObjectDownloader downloader = new JSONObjectDownloader(this, dialBuilder, "Anuluj");
+            downloader.execute(OXR_API_URL + OXR_RATES + OXR_APP_ID + mOXRKey);
+        } else {
+            calcResult();
+        }
 
     }
 
@@ -225,6 +257,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void ResultReturned(JSONObject jsonObject) {
+        try {
+            mRates = jsonObject.getJSONObject(OXR_RATES_OBJECT);
+            mRatesTimestamp = jsonObject.getInt(OXR_RATES_TIMESTAMP);
+            calcResult();
+        } catch (JSONException e) {
+            mRates = null;
+            mRatesTimestamp = 0;
+            Error(JSONObjectDownloader.ResultCallback.ERR_JSON, "JSON object iteration error");
+        }
 
     }
 
@@ -233,5 +274,22 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if (errCode == JSONObjectDownloader.ResultCallback.ERR_CANCELED)
             errMsg = "Przeliczanie przerwane";
         Toast.makeText(this, "Error:" + errCode + ", " + errMsg, Toast.LENGTH_LONG).show();
+    }
+
+    private void calcResult() {
+        try {
+            String homeCode = extractCurrCode((String)mSpinHome.getSelectedItem());
+            String foreignCode = extractCurrCode((String)mSpinForeign.getSelectedItem());
+
+            double homeRate =mRates.getDouble(homeCode);
+            double foreignRate =mRates.getDouble(foreignCode);
+
+            double result = mForeignVal / foreignRate * homeRate;
+
+            mTxtHome.setText(RESULT_FORMAT.format(result));
+        } catch (JSONException e) {
+            mTxtHome.setText(" ");
+            Error(JSONObjectDownloader.ResultCallback.ERR_JSON, "JSON object iteration error");
+        }
     }
 }

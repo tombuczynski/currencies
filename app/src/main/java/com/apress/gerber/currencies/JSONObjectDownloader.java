@@ -101,11 +101,11 @@ public  class JSONObjectDownloader extends AsyncTask<String, Integer, JSONObject
     protected JSONObject doInBackground(String... strings) {
         if (! isCancelled() && strings != null && strings.length >=1) {
 
-//            try {
-//                Thread.sleep(8000);
-//            } catch (InterruptedException e) {
-//                return null;
-//            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                return null;
+            }
 
             InputStream stream = null;
             try {
