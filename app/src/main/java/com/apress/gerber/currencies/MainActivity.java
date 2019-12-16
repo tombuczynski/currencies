@@ -11,10 +11,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ActionBar actionBar = getSupportActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setIcon(R.mipmap.ic_launcher_round);
             actionBar.setDisplayShowHomeEnabled(true);
@@ -136,6 +139,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
             }
         });
+
+        mEditForeign.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    onCalcButtonClick(v);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -192,6 +206,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void onCalcButtonClick(View v) {
+
+        hideSoftKeyboard(v);
+
         long currentTime = System.currentTimeMillis();
         if ((System.currentTimeMillis() / 1000L - mRatesTimestamp) > RATES_TIMEOUT) {
             AlertDialog.Builder dialBuilder = new AlertDialog.Builder(this);
@@ -208,6 +225,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             calcResult();
         }
 
+    }
+
+    private void hideSoftKeyboard(View v) {
+        InputMethodManager methodManager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        methodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
     private void saveCurrCodeSpinnerSelection(Spinner spinner, String spinnerKey) {
