@@ -36,7 +36,7 @@ import java.util.Date;
 import static android.widget.AdapterView.INVALID_POSITION;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, JSONObjectDownloader.ResultCallback {
-    private static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
+    public static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
     private static final String SUPPORTED_CURRENCIES_URL = "https://oxr.readme.io/docs/supported-currencies";
     private static final String SPINNER_KEY_FOREIGN = "spinner_foreign";
     private static final String SPINNER_KEY_HOME = "spinner_home";
@@ -86,8 +86,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         }
 
-        if (mCurrencies == null)
+        if (mCurrencies == null) {
             finish();
+            return;
+        }
+
 
         mSpinForeign = findViewById(R.id.spin_foreign);
         mSpinHome = findViewById(R.id.spin_home);

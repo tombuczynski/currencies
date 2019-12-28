@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class SplashActivity extends Activity implements JSONObjectDownloader.ResultCallback {
-    private static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
+    public static final String CURR_LIST_NAME = "CURRIENCIES_LIST";
     private static final String OXR_API_URL = "https://openexchangerates.org/api/";
     private static final String OXR_CODES = "currencies.json";
     private ArrayList<String> mCurrenciesList;
