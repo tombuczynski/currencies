@@ -45,7 +45,7 @@ public class MainActivityTest {
 
 
     @Test
-    public void testCalc() {
+    public void testFloat() {
         onView(withId(R.id.spin_foreign)).perform(click());
         onData(allOf(instanceOf(String.class), containsString("PLN"))).perform(click());
 
