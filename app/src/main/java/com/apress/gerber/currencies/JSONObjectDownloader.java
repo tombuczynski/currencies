@@ -39,7 +39,7 @@ public  class JSONObjectDownloader extends AsyncTask<String, Integer, JSONObject
     }
 
 
-    public static interface ResultCallback {
+    public interface ResultCallback {
 
         int ERR_OK = 0;
         int ERR_HTTPS_URL_REQUIRED = 1;
