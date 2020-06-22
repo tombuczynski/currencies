@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private String mOXRKey;
 
     private String[] mCurrencies;
-    private double mForeignVal;
+    private double mForeignVal = 1.0;
 
     private Spinner mSpinForeign, mSpinHome;
     private EditText mEditForeign;
